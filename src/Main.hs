@@ -3,7 +3,7 @@
 module Main where
 
 main :: IO ()
-main = p1_2
+main = p2_1
 
 getInput n = do
   let filename = "input/" ++ show n ++ ".txt"
@@ -30,9 +30,12 @@ p1_2 = do
   print $ total
 
 
-getPair :: [Int] -> (Int, Int)
-getPair xs = (maximum xs, minimum xs)
+getPair :: [String] -> (Int, Int)
+getPair xs =
+  (maximum xs', minimum xs')
+  where xs' = map read xs
 
 p2_1 =
-  (map words . lines) <$> getInput 2
-  -- >>= (\xs -> return $ map (getPair . map read) xs)
+  map (\(h,l) -> h - l) <$> map getPair <$> (map words . lines) <$> getInput 2
+  >>= (\ns -> return $ sum ns)
+  >>= print
