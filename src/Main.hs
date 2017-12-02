@@ -29,13 +29,10 @@ p1_2 = do
   let total = sum $ map (\(x,_) -> read [x]) pairs'
   print $ total
 
-
-getPair :: [String] -> (Int, Int)
-getPair xs =
-  (maximum xs', minimum xs')
-  where xs' = map read xs
+input2 :: IO [[Int]]
+input2 = (map (map read . words)) . lines <$> getInput 2
 
 p2_1 =
-  map (\(h,l) -> h - l) <$> map getPair <$> (map words . lines) <$> getInput 2
+  map (\(h,l) -> h - l) <$> map (\xs -> (maximum xs, minimum xs)) <$> input2
   >>= (\ns -> return $ sum ns)
   >>= print
