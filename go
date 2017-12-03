@@ -1,1 +1,1 @@
-stack build; stack exec advent2017
+stack build && stack exec advent2017
