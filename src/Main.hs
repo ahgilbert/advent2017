@@ -2,8 +2,10 @@
 
 module Main where
 
+import Data.List
+
 main :: IO ()
-main = p2_1
+main = p2_2
 
 getInput n = do
   let filename = "input/" ++ show n ++ ".txt"
@@ -36,3 +38,17 @@ p2_1 =
   map (\(h,l) -> h - l) <$> map (\xs -> (maximum xs, minimum xs)) <$> input2
   >>= (\ns -> return $ sum ns)
   >>= print
+
+pairs :: [a] -> [(a,a)]
+pairs xs = [(x,y) | (x:ys) <- tails xs, y <- ys]
+
+p2_2 = do
+  matches <- sum
+             <$> map (\(a,b) -> div a b)
+             <$> filter (\(a,b) -> rem a b == 0)
+             <$> concatMap pairs
+             <$> map descending
+             <$> input2
+  print matches
+  where
+    descending = (\ns -> reverse . sort $ ns)
