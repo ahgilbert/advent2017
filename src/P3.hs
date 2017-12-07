@@ -38,20 +38,26 @@ p3_1 = do
 
 add (a,b) (c,d) = (a+c, b+d)
 
-neighbors center =
-  let steps = [(x,y) | x <- [-1,0,1], y <- [-1,0,1]]
-  in map (add center) steps
+neighborhood :: SpiralArray -> (Int, Int) -> IO [Int]
+neighborhood array center =
+  mapM (readArray array) (neighbors center)
+  where
+    neighbors center =
+      let steps = [(x,y) | x <- [-1,0,1], y <- [-1,0,1]]
+      in map (add center) steps
 
-neighborhoodTotal :: SpiralArray -> (Int, Int) -> IO Int
-neighborhoodTotal array center =
-  sum <$> mapM (readArray array) (neighbors center)
-
-createArray :: Int -> IO SpiralArray
-createArray n = do
-  arr <- newArray ((-n, -n), (n, n)) 0 :: IO SpiralArray
-  return arr
+leftTurn (0,1) = (-1,0)
+leftTurn (-1,0) = (0,-1)
+leftTurn (0,-1) = (1,0)
+leftTurn (1,0) = (0,1)
+leftTurn _ = undefined
 
 p3_2 = do
   width <- (\(_,n) -> (n + 1) * 2) <$> getLayerStart <$> read <$> getInput 3
   arr <- createArray width
+  writeArray arr (0,0) 1
   return ()
+  where
+    createArray n = do
+      arr <- newArray ((-n, -n), (n, n)) 0 :: IO SpiralArray
+      return arr
