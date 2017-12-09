@@ -13,18 +13,27 @@ type Parser = Parsec Void String
 data P9Stream = Garbage | Group [P9Stream]
 
 p9_1 = do
-  input <- Util.getInput 1009
+  input <- Util.getInput 9
   let parsed = runParser parseGroup "" input
   print $ either (\_ -> -1) score parsed
 
+-- unfoldTree :: (b -> (a, [b]) -> b -> Tree a
+-- g -> ((), [groupsOnly])
+faith :: P9Stream -> (Int, [P9Stream])
+faith Garbage = (0,[])
+faith (Group gs) = (1,gs)
+
 score :: P9Stream -> Int
 score Garbage = 0
-score (Group contents) = 1
+score s =
+  let tree = unfoldTree faith s
+      byDepth = zip [1..] $ levels tree
+  in sum $ concatMap (\(d,es) -> map (d *) es) byDepth
 
 parseGroup :: Parser P9Stream
 parseGroup = do
   char '{'
-  contents <- many $ parseGroup <|> parseGarbage
+  contents <- sepBy (parseGroup <|> parseGarbage) (char ',')
   char '}'
   return $ Group contents
 
@@ -38,7 +47,7 @@ parseGarbage = do
 p9char = escapedChar <|> unescapedChar
 
 unescapedChar :: Parser Char
-unescapedChar = noneOf "!<"
+unescapedChar = noneOf "!>"
 
 escapedChar :: Parser Char
 escapedChar = do
