@@ -9,5 +9,5 @@ import P4
 import P9
 
 main :: IO ()
-main = p9_1
+main = p9
 

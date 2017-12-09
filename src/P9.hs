@@ -10,25 +10,33 @@ import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
 type Parser = Parsec Void String
-data P9Stream = Garbage | Group [P9Stream]
+data P9Stream = Garbage String | Group [P9Stream]
 
-p9_1 = do
+p9 = do
   input <- Util.getInput 9
   let parsed = runParser parseGroup "" input
-  print $ either (\_ -> -1) score parsed
+  print $ either (\_ -> -1) score1 parsed
+  print $ either (\_ -> -1) score2 parsed
 
 -- unfoldTree :: (b -> (a, [b]) -> b -> Tree a
 -- g -> ((), [groupsOnly])
 faith :: P9Stream -> (Int, [P9Stream])
-faith Garbage = (0,[])
+faith (Garbage s) = (0,[])
 faith (Group gs) = (1,gs)
 
-score :: P9Stream -> Int
-score Garbage = 0
-score s =
+hope (Garbage s) = (length s, [])
+hope (Group gs) = (0,gs)
+
+score1 :: P9Stream -> Int
+score1 (Garbage _) = 0
+score1 s =
   let tree = unfoldTree faith s
       byDepth = zip [1..] $ levels tree
   in sum $ concatMap (\(d,es) -> map (d *) es) byDepth
+
+score2 s =
+  let tree = unfoldTree hope s
+  in sum $ flatten tree
 
 parseGroup :: Parser P9Stream
 parseGroup = do
@@ -40,17 +48,20 @@ parseGroup = do
 parseGarbage :: Parser P9Stream
 parseGarbage = do
   char '<'
-  many p9char
+  contents <- many p9char
   char '>'
-  return Garbage
+  return $ Garbage (concat contents)
 
 p9char = escapedChar <|> unescapedChar
 
-unescapedChar :: Parser Char
-unescapedChar = noneOf "!>"
+unescapedChar :: Parser String
+unescapedChar = do
+  c <- noneOf "!>"
+  return [c]
 
-escapedChar :: Parser Char
+escapedChar :: Parser String
 escapedChar = do
   char '!'
   anyChar
+  return []
 
