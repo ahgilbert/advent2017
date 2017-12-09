@@ -3,6 +3,7 @@ module P9 where
 import Util
 import Data.Either
 import Data.Maybe
+import Data.Tree
 import Data.Void
 import Text.Megaparsec
 import Text.Megaparsec.Char
@@ -12,15 +13,13 @@ type Parser = Parsec Void String
 data P9Stream = Garbage | Group [P9Stream]
 
 p9_1 = do
-  input <- Util.getInput 9
-  print input
+  input <- Util.getInput 1009
+  let parsed = runParser parseGroup "" input
+  print $ either (\_ -> -1) score parsed
 
-parseStream :: Parser P9Stream
-parseStream = do
-  sign <- optional $ char '-'
-  num <- some digitChar
-  let n = read num :: Int
-  return Garbage
+score :: P9Stream -> Int
+score Garbage = 0
+score (Group contents) = 1
 
 parseGroup :: Parser P9Stream
 parseGroup = do

@@ -21,4 +21,5 @@ executable advent2017
                        , Unique
                        , array
                        , megaparsec
+                       , containers
   other-modules:       Util, P1, P2, P3, P4, P9
