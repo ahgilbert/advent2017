@@ -9,9 +9,10 @@ import P4
 -- P5 done in java
 import P6
 import P7
+import P8
 import P9
 import P11
 
 main :: IO ()
-main = p6
+main = p8
 
