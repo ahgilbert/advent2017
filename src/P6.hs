@@ -3,14 +3,17 @@ module P6 where
 import Util
 import Data.List
 import Data.List.Split
+import Data.Maybe
 
 p6 = do
   seed <- map read <$> splitOn "\t" <$> getInput 6
   let annotated = markDupes $ iterate step seed
       untilDupe = takeWhile (\(x,_) -> not x) annotated
-      firstDupe = find (\(x,_) -> x) annotated
+      firstDupe = fromJust $ find (\(x,_) -> x) annotated
       part1 = length untilDupe
+      idxOfDuped = length $ takeWhile (\(_,x) -> x /= (snd firstDupe)) annotated
   print $ "first duplicate appears after " ++ show part1 ++ " steps"
+  print $ "the loop starts at " ++ show idxOfDuped ++ " and is " ++ show (part1 - idxOfDuped) ++ " long"
 
 getDistribution ns =
   let biggest = maximum ns
