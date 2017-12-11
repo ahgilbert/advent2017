@@ -22,15 +22,21 @@ p7 = do
       descendants = unique $ concatMap (\(_,_,x) -> x) parsed
       root = head $ filter (\k -> not $ elem k descendants) keys
   faith <- runReaderT (unfoldTreeM genTower root) parsed
-  print $ length $ levels faith
+  let weights = fmap (\(k,_,_) -> (k, weight parsed k)) faith
+  print $ drawTree $ fmap (\(k,w) -> k ++ " " ++ (show w)) weights
 
 matchKey :: String -> Circuit -> Bool
 matchKey t (k,_,_) = k == t
 
+weight :: [Circuit] -> String -> Int
+weight circuits key =
+  let (_,w,cs) = fromJust $ find (matchKey key) circuits
+  in sum $ w : map (weight circuits) cs
+
 genTower :: String -> ReaderT [Circuit] IO (Circuit, [String])
-genTower root = do
+genTower base = do
   circuits <- ask
-  let c@(_,_,cs) = fromJust $ find (matchKey root) circuits
+  let c@(_,_,cs) = fromJust $ find (matchKey base) circuits
   return (c, cs)
 
 parseCircuit :: Parser Circuit
