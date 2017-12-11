@@ -16,7 +16,7 @@ type Parser = Parsec Void String
 type Circuit = (String, Int, [String])
 
 p7 = do
-  input <- lines <$> Util.getInput 1007
+  input <- lines <$> Util.getInput 7
   let parsed = rights $ map (runParser parseCircuit "") input
       keys = map (\(x,_,_) -> x) parsed
       descendants = unique $ concatMap (\(_,_,x) -> x) parsed
