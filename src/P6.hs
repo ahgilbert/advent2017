@@ -5,10 +5,12 @@ import Data.List
 import Data.List.Split
 
 p6 = do
-  seed <- map read <$> splitOn "\t" <$> getInput 1006
-  let distributions = iterate step seed
-      cycleLength = find fst $ markDupes distributions
-  print $ cycleLength
+  seed <- map read <$> splitOn "\t" <$> getInput 6
+  let annotated = markDupes $ iterate step seed
+      untilDupe = takeWhile (\(x,_) -> not x) annotated
+      firstDupe = find (\(x,_) -> x) annotated
+      part1 = length untilDupe
+  print $ "first duplicate appears after " ++ show part1 ++ " steps"
 
 getDistribution ns =
   let biggest = maximum ns
