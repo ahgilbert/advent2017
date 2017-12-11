@@ -1,8 +1,10 @@
 module P8 where
 
+import Util
+import Data.Either
 import Data.Maybe
 import Data.Void
-import Data.HashTable.IO
+import qualified Data.HashTable.IO as HT
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
@@ -12,10 +14,15 @@ data Cmd = Inc Int | Dec Int
 data Condition = Cond Register Predicate Int | Pass
 type Predicate = Int -> Int -> Bool
 type Parser = Parsec Void String
-type Machine = BasicHashTable Register Int
+type Machine = HT.BasicHashTable Register Int
 
 p8 = do
-  print "ok"
+  input <- lines <$> Util.getInput 1008
+  let parsed = rights $ map (runParser parseInstruction "") input
+      registers = map (\(r,_,_) -> r) parsed
+  ht <- HT.fromList (zip registers (repeat 0)) :: IO Machine
+  print $ length input
+  print $ length parsed
 
 num :: Parser Int
 num = read <$> (some $ oneOf "-0987654321")
