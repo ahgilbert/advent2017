@@ -6,8 +6,9 @@ import Data.List.Split
 
 p6 = do
   seed <- map read <$> splitOn "\t" <$> getInput 1006
-  let redistribution = iterate step seed
-  print $ step $ step seed
+  let distributions = iterate step seed
+      cycleLength = find fst $ markDupes distributions
+  print $ cycleLength
 
 getDistribution ns =
   let biggest = maximum ns
@@ -32,3 +33,12 @@ rotate n ns =
 step ns =
   let (emptied, toAdd) = getDistribution ns
   in zipWith (+) emptied toAdd
+
+markDupes ns =
+  map (\idx ->
+         let n = ns !! idx
+         in
+          if elem n (take idx ns)
+          then (True, n)
+          else (False, n))
+      [0..]
