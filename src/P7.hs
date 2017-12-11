@@ -1,7 +1,7 @@
 module P7 where
 
 import Util
-import Control.Monad.State as S
+import Control.Monad.Reader
 import Data.Either
 import Data.List
 import Data.List.Unique
@@ -21,16 +21,17 @@ p7 = do
       keys = map (\(x,_,_) -> x) parsed
       descendants = unique $ concatMap (\(_,_,x) -> x) parsed
       root = head $ filter (\k -> not $ elem k descendants) keys
-  -- put parsed
-  -- unfoldTreeM genTowerM root
-  print $ "ok"
+  faith <- runReaderT (unfoldTreeM genTower root) parsed
+  print $ length $ levels faith
 
 matchKey :: String -> Circuit -> Bool
 matchKey t (k,_,_) = k == t
 
-genTowerM :: String -> S.State [Circuit] (Circuit, [String])
-genTowerM =
-  undefined
+genTower :: String -> ReaderT [Circuit] IO (Circuit, [String])
+genTower root = do
+  circuits <- ask
+  let c@(_,_,cs) = fromJust $ find (matchKey root) circuits
+  return (c, cs)
 
 parseCircuit :: Parser Circuit
 parseCircuit = do
