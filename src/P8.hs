@@ -2,6 +2,7 @@ module P8 where
 
 import Data.Maybe
 import Data.Void
+import Data.HashTable.IO
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
@@ -11,6 +12,7 @@ data Cmd = Inc Int | Dec Int
 data Condition = Cond Register Predicate Int | Pass
 type Predicate = Int -> Int -> Bool
 type Parser = Parsec Void String
+type Machine = BasicHashTable Register Int
 
 p8 = do
   print "ok"
