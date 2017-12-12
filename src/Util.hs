@@ -4,7 +4,7 @@ import Data.Void
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
-getInput n = do
+slurp n = do
   let filename = "input/" ++ show n ++ ".txt"
   raw <- readFile filename
   return raw

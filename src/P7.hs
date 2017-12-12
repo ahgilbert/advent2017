@@ -15,7 +15,7 @@ import qualified Text.Megaparsec.Char.Lexer as L
 type Circuit = (String, Int, [String])
 
 p7 = do
-  input <- lines <$> Util.getInput 7
+  input <- lines <$> slurp 7
   let parsed = rights $ map (runParser parseCircuit "") input
       keys = map (\(x,_,_) -> x) parsed
       descendants = unique $ concatMap (\(_,_,x) -> x) parsed

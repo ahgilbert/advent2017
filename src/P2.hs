@@ -4,7 +4,7 @@ import Data.List
 import Util
 
 input2 :: IO [[Int]]
-input2 = (map (map read . words)) . lines <$> getInput 2
+input2 = (map (map read . words)) . lines <$> slurp 2
 
 p2_1 =
   map (\(h,l) -> h - l) <$> map (\xs -> (maximum xs, minimum xs)) <$> input2

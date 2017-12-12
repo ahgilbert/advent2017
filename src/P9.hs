@@ -12,7 +12,7 @@ import qualified Text.Megaparsec.Char.Lexer as L
 data P9Stream = Garbage String | Group [P9Stream]
 
 p9 = do
-  input <- Util.getInput 9
+  input <- slurp 9
   let parsed = runParser parseGroup "" input
   print $ either (\_ -> -1) score1 parsed
   print $ either (\_ -> -1) score2 parsed

@@ -6,7 +6,7 @@ import Data.List.Split
 import Data.Maybe
 
 p6 = do
-  seed <- map read <$> splitOn "\t" <$> getInput 6
+  seed <- map read <$> splitOn "\t" <$> slurp 6
   let annotated = markDupes $ iterate step seed
       untilDupe = takeWhile (\(x,_) -> not x) annotated
       firstDupe = fromJust $ find (\(x,_) -> x) annotated

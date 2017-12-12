@@ -30,7 +30,7 @@ proceed dist (ix,iy) =
     else (left + 1 + dist - (3 * sideLength), bottom)
 
 p3_1 = do
-  input <- read <$> getInput 3
+  input <- read <$> slurp 3
   let layerStart = getLayerStart input
       remainingDistance = input - (snd layerStart)
   print $ manhattan (0,0) $ proceed remainingDistance (fst layerStart)
@@ -81,7 +81,7 @@ iterateUntilM p f v
     | otherwise = f v >>= iterateUntilM p f
 
 p3_2 = do
-  input <- read <$> getInput 3
+  input <- read <$> slurp 3
   let width = (\(_,n) -> (n + 1) * 2) $ getLayerStart input
   arr <- createArray width
   writeArray arr (0,0) 1

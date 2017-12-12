@@ -16,7 +16,7 @@ type Predicate = Int -> Int -> Bool
 type Machine = HT.BasicHashTable Register Int
 
 p8 = do
-  input <- lines <$> Util.getInput 1008
+  input <- lines <$> slurp 1008
   let parsed = rights $ map (runParser parseInstruction "") input
       registers = map (\(r,_,_) -> r) parsed
   ht <- HT.fromList (zip registers (repeat 0)) :: IO Machine

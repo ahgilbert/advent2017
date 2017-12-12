@@ -6,7 +6,7 @@ import Math.Geometry.Grid
 import Math.Geometry.Grid.Hexagonal2
 
 p11 = do
-  input <- splitOn "," <$> takeWhile (\c -> elem c "nsew,") <$> getInput 11
+  input <- splitOn "," <$> takeWhile (\c -> elem c "nsew,") <$> slurp 11
   let grid = UnboundedHexGrid
       path = map (distance grid (0,0)) $ scanl move (0,0) input
       finalDist = (last path)
