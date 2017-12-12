@@ -13,7 +13,6 @@ type Register = String
 data Cmd = Inc Int | Dec Int
 data Condition = Cond Register Predicate Int | Pass
 type Predicate = Int -> Int -> Bool
-type Parser = Parsec Void String
 type Machine = HT.BasicHashTable Register Int
 
 p8 = do
@@ -23,9 +22,6 @@ p8 = do
   ht <- HT.fromList (zip registers (repeat 0)) :: IO Machine
   print $ length input
   print $ length parsed
-
-num :: Parser Int
-num = read <$> (some $ oneOf "-0987654321")
 
 -- ioe dec 890 if qk > -10
 -- gif inc -533 if qt <= 7

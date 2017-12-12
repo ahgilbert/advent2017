@@ -9,7 +9,6 @@ import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
-type Parser = Parsec Void String
 data P9Stream = Garbage String | Group [P9Stream]
 
 p9 = do
