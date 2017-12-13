@@ -22,7 +22,7 @@ p8 = do
   dict <- createMap registers
   mapM_ (evalInstruction dict) parsed
   maxEver <- HT.lookup dict "ahgrulz"
-  HT.insert dict "ahgrulz" 0
+  HT.insert dict "ahgrulz" 0 -- or else it will clobber p1
   vals <- map snd <$> HT.toList dict
   print $ "max at end: " ++ show (maximum vals)
   print $ "max ever: " ++ show (fromJust maxEver)
