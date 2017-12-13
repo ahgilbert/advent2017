@@ -11,9 +11,10 @@ import P6
 import P7
 import P8
 import P9
+import P10
 import P11
 import P12
 
 main :: IO ()
-main = p8
+main = p10
 
