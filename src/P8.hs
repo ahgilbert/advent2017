@@ -21,11 +21,15 @@ p8 = do
       registers = map (\(r,_,_) -> r) parsed
   dict <- createMap registers
   mapM_ (evalInstruction dict) parsed
+  maxEver <- HT.lookup dict "ahgrulz"
+  HT.insert dict "ahgrulz" 0
   vals <- map snd <$> HT.toList dict
-  print $ maximum vals
+  print $ "max at end: " ++ show (maximum vals)
+  print $ "max ever: " ++ show (fromJust maxEver)
 
 createMap keys = do
-  dict <- HT.fromList $ zip keys (repeat 0) :: IO (HT.BasicHashTable String Int)
+  let keys' = "ahgrulz" : keys
+  dict <- HT.fromList $ zip keys' (repeat 0) :: IO (HT.BasicHashTable String Int)
   return dict
 
 evalInstruction :: Machine -> Instruction -> IO ()
@@ -33,18 +37,19 @@ evalInstruction dict (reg, cmd, cond) = do
   continue <- evalCond dict cond
   if continue
   then do
-    print $ reg ++ " passes comparison"
+    maxEver <- fromJust <$> HT.lookup dict "ahgrulz"
     currentVal <- fromJust <$> HT.lookup dict reg
     let newVal = cmd currentVal
     HT.insert dict reg newVal
+    if newVal > maxEver
+    then HT.insert dict "ahgrulz" newVal
+    else return ()
   else return ()
 
 evalCond :: Machine -> Condition -> IO Bool
 evalCond _ Pass = do
-  print "eval pass condition"
   return True
 evalCond dict (Cond reg cmp v) = do
-  print $ "eval condition on " ++ reg
   regVal <- fromJust <$> HT.lookup dict reg
   return $ cmp regVal v
 
