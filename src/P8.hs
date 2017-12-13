@@ -10,26 +10,41 @@ import Text.Megaparsec.Char
 
 type Instruction = (Register, Cmd, Condition)
 type Register = String
-data Cmd = Inc Int | Dec Int
+type Cmd = Int -> Int
 data Condition = Cond Register Predicate Int | Pass
 type Predicate = Int -> Int -> Bool
 type Machine = HT.BasicHashTable Register Int
 
 p8 = do
-  input <- lines <$> slurp 1008
+  input <- lines <$> slurp 8
   let parsed = rights $ map (runParser parseInstruction "") input
       registers = map (\(r,_,_) -> r) parsed
   dict <- createMap registers
-  print $ length input
-  print $ length parsed
+  mapM_ (evalInstruction dict) parsed
+  vals <- map snd <$> HT.toList dict
+  print $ maximum vals
 
 createMap keys = do
   dict <- HT.fromList $ zip keys (repeat 0) :: IO (HT.BasicHashTable String Int)
   return dict
 
+evalInstruction :: Machine -> Instruction -> IO ()
+evalInstruction dict (reg, cmd, cond) = do
+  continue <- evalCond dict cond
+  if continue
+  then do
+    print $ reg ++ " passes comparison"
+    currentVal <- fromJust <$> HT.lookup dict reg
+    let newVal = cmd currentVal
+    HT.insert dict reg newVal
+  else return ()
+
 evalCond :: Machine -> Condition -> IO Bool
-evalCond _ Pass = return True
+evalCond _ Pass = do
+  print "eval pass condition"
+  return True
 evalCond dict (Cond reg cmp v) = do
+  print $ "eval condition on " ++ reg
   regVal <- fromJust <$> HT.lookup dict reg
   return $ cmp regVal v
 
@@ -45,10 +60,15 @@ parseInstruction = do
   space
   arg <- num
   cond <- fromMaybe Pass <$> optional parseCondition
-  return ("a", Inc 1, Pass)
+  let changer =
+        if cmd == "inc"
+        then (\n -> n + arg)
+        else (\n -> n - arg)
+  return (dest, changer, cond)
 
 parseCondition :: Parser Condition
 parseCondition = do
+  space
   string "if"
   space
   reg <- some letterChar

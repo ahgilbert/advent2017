@@ -15,5 +15,5 @@ import P11
 import P12
 
 main :: IO ()
-main = p12
+main = p8
 
