@@ -19,9 +19,19 @@ p8 = do
   input <- lines <$> slurp 1008
   let parsed = rights $ map (runParser parseInstruction "") input
       registers = map (\(r,_,_) -> r) parsed
-  ht <- HT.fromList (zip registers (repeat 0)) :: IO Machine
+  dict <- createMap registers
   print $ length input
   print $ length parsed
+
+createMap keys = do
+  dict <- HT.fromList $ zip keys (repeat 0) :: IO (HT.BasicHashTable String Int)
+  return dict
+
+evalCond :: Machine -> Condition -> IO Bool
+evalCond _ Pass = return True
+evalCond dict (Cond reg cmp v) = do
+  regVal <- fromJust <$> HT.lookup dict reg
+  return $ cmp regVal v
 
 -- ioe dec 890 if qk > -10
 -- gif inc -533 if qt <= 7
