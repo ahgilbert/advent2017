@@ -10,12 +10,17 @@ testInput = [(0,3),(1,2),(4,4),(6,4)]
 p13 = do
   input <- lines <$> slurp 13
   let parsed = rights $ map (runParser parseFirewall "") input
-      naiveCost = sum $ map fst $ filter snd $ map collision parsed
+      naiveCost = tripCost parsed 0
+      allTripCosts = map (tripCost parsed) [0..]
+      bestDelay = length $ takeWhile (\x -> length x > 0) allTripCosts
   print naiveCost
+  print bestDelay -- 1968 is too low
 
-collision (d,1) = (d, True)
-collision (d,2) = (d * 2, 0 == mod d 2)
-collision (d,r) = (d * r, 0 == mod d (r + (r - 2)))
+tripCost guards delay =
+  map fst $ filter snd $ map (collision' delay) guards
+
+collision' _ (d,1) = (d, True)
+collision' delay (d,r) = (d, 0 == mod (d + delay) (2 * (r - 1)))
 
 parseFirewall :: Parser (Int, Int)
 parseFirewall = do
