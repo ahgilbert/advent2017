@@ -14,7 +14,7 @@ p13 = do
       allTripCosts = map (tripCollisions parsed) [0..]
       bestDelay = length $ takeWhile (\x -> length x > 0) allTripCosts
   print naiveCost
-  print bestDelay -- 1968 is too low
+  print bestDelay
 
 tripCollisions guards delay =
   map fst $ filter snd $ map (detectCollision delay) guards
