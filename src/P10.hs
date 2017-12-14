@@ -10,10 +10,11 @@ p10size = 256
 p10 = do
   input <- map read <$> splitOn "," <$> slurp 10 :: IO [Int]
   let initList = take p10size [0..]
-      allp10 = scanl step (initList, 0, 0) input
-      p10_1 = p10hash $ (\(x,_,_) -> x) $ last allp10
-  mapM_ print $ allp10
+      step1 = oneStep input
+      p10_1 = p10hash $ (\(x,_,_) -> x) $ step1
   print p10_1
+
+oneStep input = foldl step ([0..p10size-1], 0, 0) input
 
 step :: ([a], Int, Int) -> Int -> ([a], Int, Int)
 step (list, start, skip) n =
