@@ -23,3 +23,9 @@ pad n s =
   if length s >= n
   then s
   else (replicate (n - length s) '0') ++ s
+
+add2 (a,b) (c,d) = (a+c, b+d)
+
+neighbors center =
+  let steps = [(x,y) | x <- [-1,0,1], y <- [-1,0,1]]
+  in filter (\x -> x /= center) $ map (add2 center) steps

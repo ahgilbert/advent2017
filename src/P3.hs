@@ -36,15 +36,9 @@ p3_1 = do
   print $ manhattan (0,0) $ proceed remainingDistance (fst layerStart)
   print ""
 
-add (a,b) (c,d) = (a+c, b+d)
-
 neighborhood :: SpiralArray -> (Int, Int) -> IO [Int]
 neighborhood array center =
   mapM (readArray array) (neighbors center)
-  where
-    neighbors center =
-      let steps = [(x,y) | x <- [-1,0,1], y <- [-1,0,1]]
-      in map (add center) steps
 
 leftTurn (0,1) = (-1,0)
 leftTurn (-1,0) = (0,-1)
@@ -54,7 +48,7 @@ leftTurn _ = undefined
 
 step arr (_, loc, step, sides) = do
   neighbors <- neighborhood arr loc
-  let loc' = add loc step
+  let loc' = add2 loc step
       total = sum neighbors
   writeArray arr loc total
   if (head sides) == 1

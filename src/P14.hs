@@ -13,10 +13,13 @@ p14seeds =
   map knotHash $
   map (\i -> p14input ++ "-" ++ show i) [0..127]
 
-p14 =
+p14_1 =
   print $
   sum $
   map (length . filter (== '1') . longHexToBin) p14seeds
+
+p14_2 =
+  print "ok"
 
 longHexToBin s =
   concatMap hexToBin $ chunksOf 2 s
