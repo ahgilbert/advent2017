@@ -55,8 +55,6 @@ p10_2 = do
   hash <- knotHash <$> slurp 10
   print $ hash
 
-p2input = map (ord) <$> (\cs -> cs ++ "17,31,73,47,23") <$> slurp 10
-
 sparseToDense :: (Data.Bits.Bits e, Integral e, Show e) => [e] -> String
 sparseToDense sparse =
   let bits = chunksOf 16 sparse
