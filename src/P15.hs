@@ -4,11 +4,19 @@ import Util
 import Data.Char
 import Numeric
 
-genA = mkGenerator 703 16807
-genB = mkGenerator 516 48271
+-- input A = seed: 703, factor: 16807
+-- input B = seed: 516, factor: 48271
 
-mkGenerator seed factor =
-  undefined
+genA = mkGenerator 16807
+genB = mkGenerator 48271
+
+seqA = getSeq genA 703
+seqB = getSeq genB 516
+
+getSeq gen seed = tail $ iterate gen seed
+
+mkGenerator factor =
+  (\i -> rem (i * factor) 2147483647)
 
 bitsMatch n (a,b) =
   let trim cs = reverse $ take n $ reverse cs
