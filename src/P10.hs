@@ -10,14 +10,24 @@ import System.IO.Unsafe
 
 p10size = 256
 
-p10 = do
+p10_1 = do
   input <- map read <$> splitOn "," <$> slurp 10 :: IO [Int]
   let initList = take p10size [0..]
-      step1 = knotHash input
+      step1 = knotHashInts input
       p10_1 = p1hash $ (\(x,_,_) -> x) $ step1
   print p10_1
 
-knotHash input = foldl step ([0..p10size-1], 0, 0) input
+knotHashInts input = foldl step ([0..p10size-1], 0, 0) input
+
+knotHash s =
+  sparseToDense $
+  (\(x,_,_) -> x) $
+  knotHashInts $
+  concat $
+  replicate 64 $
+  (\cs -> cs ++ [17,31,73,47,23]) $
+  map (ord) $
+  s
 
 step :: ([a], Int, Int) -> Int -> ([a], Int, Int)
 step (list, start, skip) n =
@@ -42,13 +52,21 @@ p1hash ls =
   (head ls) * (head $ tail ls)
 
 p10_2 = do
-  sparse <- (\(x,_,_) -> x) <$> knotHash <$> concat <$> replicate 64 <$> p2input
-  print $ sparseToDense sparse
+  hash <- knotHash <$> slurp 10
+  print $ hash
 
 p2input = map (ord) <$> (\cs -> cs ++ "17,31,73,47,23") <$> slurp 10
 
+sparseToDense :: (Data.Bits.Bits e, Integral e, Show e) => [e] -> String
 sparseToDense sparse =
   let bits = chunksOf 16 sparse
       xordBits = map (foldl xor 0) bits
-      hexHash = map (\i -> showHex i "") xordBits
+      hexHash = map printHex xordBits
   in concat hexHash
+
+printHex i =
+  let h = showHex i ""
+  in if length h == 1
+     then "0" ++ h
+     else h
+
