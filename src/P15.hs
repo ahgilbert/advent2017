@@ -10,8 +10,11 @@ import Numeric
 genA = mkGenerator 16807
 genB = mkGenerator 48271
 
-seqA = getSeq genA 703
-seqB = getSeq genB 516
+seqA1 = getSeq genA 703
+seqB1 = getSeq genB 516
+
+seqA2 = filter (\i -> mod i 4 == 0) $ getSeq genA 703
+seqB2 = filter (\i -> mod i 8 == 0) $ getSeq genB 516
 
 getSeq gen seed = tail $ iterate gen seed
 
@@ -26,4 +29,20 @@ bitsMatch n (a,b) =
 
 printBin n = showIntAtBase 2 intToDigit n ""
 
-p15 = print "ok"
+p15_1 =
+  let sa = seqA1
+      sb = seqB1
+      numMatches = foldl faith 0 $ take 40000000 $ zip sa sb
+  in print $ numMatches
+
+p15_2 =
+  let sa = seqA2
+      sb = seqB2
+      numMatches = foldl faith 0 $ take 5000000 $ zip sa sb
+  in print $ numMatches
+
+faith :: Int -> (Int, Int) -> Int
+faith acc (a,b) =
+  if bitsMatch 16 (a,b)
+  then acc + 1
+  else acc
