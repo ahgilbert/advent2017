@@ -9,14 +9,15 @@ import Numeric
 
 p14input = "vbqugkhl"
 
-p14seeds =
+p14strings =
+  map longHexToBin $
   map knotHash $
   map (\i -> p14input ++ "-" ++ show i) [0..127]
 
 p14_1 =
   print $
   sum $
-  map (length . filter (== '1') . longHexToBin) p14seeds
+  map (length . filter (== '1')) p14strings
 
 p14_2 =
   print "ok"
@@ -36,4 +37,6 @@ hexToBin s =
     of the graph; such edges are ignored" -}
 
 initGraph grid =
-  undefined
+  let tagCols row = zip [0..] row
+      tagRows grid = map (\(c,(r,v)) -> ((r,c),v)) $ zip [0..] grid
+  in tagRows grid
