@@ -6,7 +6,7 @@ import Text.Megaparsec.Char
 
 slurp n = do
   let filename = "input/" ++ show n ++ ".txt"
-  raw <- filter (/= '\n') <$> readFile filename
+  raw <- reverse <$> dropWhile (== '\n') <$> reverse <$> readFile filename
   return raw
 
 manhattan (a,b) (c,d) =
