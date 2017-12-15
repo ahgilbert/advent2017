@@ -18,3 +18,8 @@ type Parser = Parsec Void String
 
 num :: Parser Int
 num = read <$> (some $ oneOf "-0987654321")
+
+pad n s =
+  if length s >= n
+  then s
+  else (replicate (n - length s) '0') ++ s
