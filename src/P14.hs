@@ -5,6 +5,7 @@ import P10 (knotHash)
 import Data.Char
 import Data.Graph
 import Data.List.Split
+import Data.Maybe
 import Numeric
 
 p14input = "vbqugkhl"
@@ -37,6 +38,12 @@ hexToBin s =
     of the graph; such edges are ignored" -}
 
 initGraph grid =
-  let tagCols row = zip [0..] row
-      tagRows grid = map (\(c,(r,v)) -> ((r,c),v)) $ zip [0..] grid
-  in tagRows grid
+  let
+      putItAllTogether = (\(rIdx,rowVals) ->
+                            zipWith (\cIdx val -> (val, (cIdx,rIdx))) [0..] rowVals)
+      taggedRows = zip [0..] grid
+      taggedGrid = map putItAllTogether taggedRows
+      nodes = concatMap (map (\(v,k) -> (v, k, neighbors k))) taggedGrid
+      onNodes = filter (\(v,_,_) -> v == '1') nodes
+      graph = graphFromEdges onNodes
+  in graph

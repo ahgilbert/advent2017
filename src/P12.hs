@@ -20,12 +20,6 @@ p12 = do
   print $ length p1
   print $ length p2
 
-getGroups _ [] _ = []
-getGroups graph keys getter =
-  let seed = head keys
-      group = reachable graph (fromJust $ getter seed)
-  in group : (getGroups graph (keys \\ group) getter)
-
 parseNode :: Parser (Int, [Int])
 parseNode = do
   node <- num
