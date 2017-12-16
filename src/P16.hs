@@ -13,8 +13,21 @@ p16 = do
 parseDanceMoves :: Parser [DanceMove]
 parseDanceMoves = sepBy (parseSpin <|> parseExchange <|> parsePartner) (string ",")
 
-parseSpin = undefined
+parseSpin = do
+  char 's'
+  size <- num
+  return $ Spin size
 
-parseExchange = undefined
+parseExchange = do
+  char 'x'
+  a <- num
+  char '/'
+  b <- num
+  return $ Exchange a b
 
-parsePartner = undefined
+parsePartner = do
+  char 'p'
+  a <- letterChar
+  char '/'
+  b <- letterChar
+  return $ Partner a b
