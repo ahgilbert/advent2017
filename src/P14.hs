@@ -22,7 +22,9 @@ p14_1 =
   map (length . filter (== '1')) p14strings
 
 p14_2 =
-  print "ok"
+  let (graph, getter, keys) = initGraph p14strings
+      groups = getGroups graph keys
+  in print $ length groups
 
 longHexToBin s =
   concatMap hexToBin $ chunksOf 2 s
@@ -46,17 +48,21 @@ testInput14 = ["0010101", -- should have 4 groups
                "0011101",
                "0010101"]
 
-initGraph :: [[Char]] -> (G.Graph, (Int,Int) -> Maybe G.Vertex, Int)
+cardinals loc =
+  map (add2 loc) [(-1,0),(1,0),(0,-1),(0,1)]
+
+initGraph :: [[Char]] -> (G.Graph, (Int,Int) -> Maybe G.Vertex, [Int])
 initGraph grid =
   let
       putItAllTogether = (\(rIdx,rowVals) ->
                             zipWith (\cIdx val -> (val, (cIdx,rIdx))) [0..] rowVals)
       taggedRows = zip [0..] grid
       taggedGrid = map putItAllTogether taggedRows
-      nodes = concatMap (map (\(v,k) -> (v, k, neighbors k))) taggedGrid
+      nodes = concatMap (map (\(v,k) -> (v, k, cardinals k))) taggedGrid
       onNodes = filter (\(v,_,_) -> v == '1') nodes
       (graph,_,get) = graphFromEdges onNodes
-  in (graph, get, length onNodes)
+      keys = [0..length onNodes - 1]
+  in (graph, get, keys)
 
 getGroups _ [] = []
 getGroups graph keys =
