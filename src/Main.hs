@@ -21,5 +21,5 @@ import P16
 import P17
 
 main :: IO ()
-main = p17
+main = p17_2
 
