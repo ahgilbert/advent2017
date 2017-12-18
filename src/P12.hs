@@ -26,3 +26,9 @@ parseNode = do
   string " <-> "
   connected <- sepBy num (string ", ")
   return $ (node, connected)
+
+getGroups _ [] _ = []
+getGroups graph keys getter =
+  let seed = head keys
+      group = reachable graph (fromJust $ getter seed)
+  in group : (getGroups graph (keys \\ group) getter)

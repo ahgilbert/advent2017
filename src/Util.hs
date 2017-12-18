@@ -33,9 +33,3 @@ add2 (a,b) (c,d) = (a+c, b+d)
 neighbors center =
   let steps = [(x,y) | x <- [-1,0,1], y <- [-1,0,1]]
   in filter (\x -> x /= center) $ map (add2 center) steps
-
-getGroups _ [] _ = []
-getGroups graph keys getter =
-  let seed = head keys
-      group = reachable graph (fromJust $ getter seed)
-  in group : (getGroups graph (keys \\ group) getter)

@@ -3,7 +3,8 @@ module P14 where
 import Util
 import P10 (knotHash)
 import Data.Char
-import Data.Graph
+import Data.Graph as G
+import Data.List
 import Data.List.Split
 import Data.Maybe
 import Numeric
@@ -45,6 +46,7 @@ testInput14 = ["0010101", -- should have 4 groups
                "0011101",
                "0010101"]
 
+initGraph :: [[Char]] -> (G.Graph, (Int,Int) -> Maybe G.Vertex, Int)
 initGraph grid =
   let
       putItAllTogether = (\(rIdx,rowVals) ->
@@ -53,5 +55,11 @@ initGraph grid =
       taggedGrid = map putItAllTogether taggedRows
       nodes = concatMap (map (\(v,k) -> (v, k, neighbors k))) taggedGrid
       onNodes = filter (\(v,_,_) -> v == '1') nodes
-      graph = graphFromEdges onNodes
-  in graph
+      (graph,_,get) = graphFromEdges onNodes
+  in (graph, get, length onNodes)
+
+getGroups _ [] = []
+getGroups graph keys =
+  let seed = head keys
+      group = reachable graph seed
+  in group : (getGroups graph (keys \\ group))
