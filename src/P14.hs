@@ -37,6 +37,14 @@ hexToBin s =
    "the out-list may contain keys that don't correspond to nodes
     of the graph; such edges are ignored" -}
 
+testInput14 = ["0010101", -- should have 4 groups
+               "0011101",
+               "1000101",
+               "1010001",
+               "1010101",
+               "0011101",
+               "0010101"]
+
 initGraph grid =
   let
       putItAllTogether = (\(rIdx,rowVals) ->
