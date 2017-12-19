@@ -1,15 +1,12 @@
 module P18 where
 
 import Util
+import Data.Array.IO
 import Data.Either
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
-p18 = do
-  input <- lines <$> slurp 18
-  let parsed = rights $ map (runParser parseDuet "") input
-  print $ length parsed
-
+type DuetArray = IOArray Int Duet
 data Duet =
   Sound Register
   | Set Register Val
@@ -18,8 +15,20 @@ data Duet =
   | Mod Register Val
   | Rcv Register
   | Jump Val Val
+  deriving (Show)
 type Register = Char
 data Val = Const Int | Reg Register
+  deriving Show
+
+p18 = do
+  input <- lines <$> slurp 18
+  let parsed = rights $ map (runParser parseDuet "") input
+      numCmds = length parsed
+  arr <- newArray (0, numCmds) (Sound 'a') :: IO DuetArray
+  mapM_ (\(l,d) -> writeArray arr l d) $ zip [0..numCmds] parsed
+  print $ testVal
+
+--------- parsers -----------
 
 parseDuet :: Parser Duet
 parseDuet =
