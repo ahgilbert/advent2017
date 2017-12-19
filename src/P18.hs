@@ -4,10 +4,18 @@ import Util
 import Control.Monad.State.Lazy
 import Data.Array.IO
 import Data.Either
+import qualified Data.Map.Strict as M
+import Data.Maybe
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
-type DuetState = StateT (Int, DuetArray) IO
+type DuetState = StateT DuetMachine IO
+data DuetMachine = DuetMachine {
+  pc :: Int,
+  lastSound :: Int,
+  commands :: DuetArray,
+  registers :: M.Map Char Int
+  }
 type DuetArray = IOArray Int Duet
 data Duet =
   Sound Register
@@ -30,16 +38,18 @@ p18 = do
   mapM_ (\(l,d) -> writeArray arr l d) $ zip [0..numCmds] parsed
   print $ numCmds
 
-duetStep :: DuetState Int
+duetStep :: DuetState ()
 duetStep = do
-  (pc, arr) <- get
-  cmd <- liftIO $ readArray arr pc
-  let pc' = execDuet arr pc
-  put (pc', arr)
-  return pc'
+  machine <- get
+  cmd <- liftIO $ readArray (commands machine) (pc machine)
+  return ()
 
-execDuet :: DuetArray -> Int -> Int
-execDuet = undefined
+duetVal :: Val -> DuetState Int
+duetVal (Reg r) = do
+  registers <- registers <$> get
+  return $ fromJust $ M.lookup r registers
+duetVal (Const i) =
+  return i
 
 --------- parsers -----------
 
