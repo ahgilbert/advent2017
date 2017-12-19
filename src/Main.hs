@@ -19,7 +19,8 @@ import P14
 import P15
 import P16
 import P17
+import P18
 
 main :: IO ()
-main = p14_2
+main = p18
 
