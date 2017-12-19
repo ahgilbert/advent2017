@@ -1,11 +1,13 @@
 module P18 where
 
 import Util
+import Control.Monad.State.Lazy
 import Data.Array.IO
 import Data.Either
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
+type DuetState = StateT (Int, DuetArray) IO
 type DuetArray = IOArray Int Duet
 data Duet =
   Sound Register
@@ -26,7 +28,18 @@ p18 = do
       numCmds = length parsed
   arr <- newArray (0, numCmds) (Sound 'a') :: IO DuetArray
   mapM_ (\(l,d) -> writeArray arr l d) $ zip [0..numCmds] parsed
-  print $ testVal
+  print $ numCmds
+
+duetStep :: DuetState Int
+duetStep = do
+  (pc, arr) <- get
+  cmd <- liftIO $ readArray arr pc
+  let pc' = execDuet arr pc
+  put (pc', arr)
+  return pc'
+
+execDuet :: DuetArray -> Int -> Int
+execDuet = undefined
 
 --------- parsers -----------
 
