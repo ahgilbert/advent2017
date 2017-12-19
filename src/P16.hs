@@ -8,12 +8,16 @@ import Text.Megaparsec
 import Text.Megaparsec.Char
 
 data DanceMove = Spin Int | Exchange Int Int | Partner Char Char
+  deriving (Show)
+
+isPartner (Partner _ _) = True
+isPartner _ = False
 
 p16 = do
   input <- slurp 16
   let moves = head $ rights [runParser parseDanceMoves "" input]
       position1 = dance 1 "abcdefghijklmnop" moves
-      position2 = dance' 2 "abcdefghijklmnop" moves
+      position2 = dance 2 "abcdefghijklmnop" moves
   print $ "after one dance: " ++ position1
   print $ "after two dances: " ++ position2
 
