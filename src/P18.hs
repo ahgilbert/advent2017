@@ -18,7 +18,8 @@ data DuetMachine = DuetMachine {
   }
 type DuetArray = IOArray Int Duet
 data Duet =
-  Sound Register
+    Nil
+  | Sound Register
   | Set Register Val
   | Add Register Val
   | Mul Register Val
@@ -34,9 +35,9 @@ p18 = do
   input <- lines <$> xslurp 18
   let parsed = rights $ map (runParser parseDuet "") input
       numCmds = length parsed
-  arr <- newArray (0, numCmds) (Sound 'a') :: IO DuetArray -- initialize registers to 0
+  putStrLn $ (show numCmds) <> " out of " <> (show $ length input) <> " commands parsed" -- TODO execute machine
+  arr <- newArray (0, numCmds) Nil :: IO DuetArray
   mapM_ (\(l,d) -> writeArray arr l d) $ zip [0..numCmds] parsed
-  print $ numCmds
 
 duetStep :: DuetState ()
 duetStep = do
@@ -50,6 +51,24 @@ duetVal (Reg r) = do
   return $ fromJust $ M.lookup r registers
 duetVal (Const i) =
   return i
+
+--------- virtual machine ------------
+
+exec :: Duet -> DuetState ()
+exec Nil = undefined -- something went wrong
+exec (Sound r) = do -- Set lastSound to val of r
+  v <- duetVal (Reg r)
+  s <- get
+  put (s { lastSound = v })
+exec (Set r v) = do -- set r to v
+  v <- duetVal v
+  s <- get
+  return ()
+exec (Add r v) = undefined -- set r to r + v
+exec (Mul r v) = undefined -- set r to r * v
+exec (Mod r v) = undefined -- set r to r % v
+exec (Rcv r) = undefined -- if r is not 0, return last sound played? Print it?
+exec (Jump r v) = undefined -- if r is greater than 0, skip v commands
 
 --------- parsers -----------
 
