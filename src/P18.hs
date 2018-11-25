@@ -30,6 +30,7 @@ data Duet =
 type Register = Char
 data Val = Const Int | Reg Register
   deriving Show
+data Faith a = Go | Terminate a
 
 p18 = do
   input <- lines <$> xslurp 18
@@ -54,20 +55,45 @@ duetVal (Const i) =
 
 --------- virtual machine ------------
 
-exec :: Duet -> DuetState ()
+exec :: Duet -> DuetState (Faith Int)
 exec Nil = undefined -- something went wrong
 exec (Sound r) = do -- Set lastSound to val of r
   v <- duetVal (Reg r)
   s <- get
   put (s { lastSound = v })
+  return Go
 exec (Set r v) = do -- set r to v
   v <- duetVal v
   s <- get
-  return ()
-exec (Add r v) = undefined -- set r to r + v
-exec (Mul r v) = undefined -- set r to r * v
-exec (Mod r v) = undefined -- set r to r % v
-exec (Rcv r) = undefined -- if r is not 0, return last sound played? Print it?
+  let newMap = M.insert r v (registers s)
+  put (s { registers = newMap })
+  return Go
+exec (Add r v) = do -- set r to r + v
+  v <- duetVal v
+  s <- get
+  let newMap = M.insertWith (+) r v (registers s)
+  put (s { registers = newMap })
+  return Go
+exec (Mul r v) = do -- set r to r * v
+  v <- duetVal v
+  s <- get
+  let newMap = M.insertWith (*) r v (registers s)
+  put (s { registers = newMap })
+  return Go
+exec (Mod r v) = do -- set r to r % v
+  v <- duetVal v
+  s <- get
+  let newMap = M.insertWith (*) r v (registers s)
+  put (s { registers = newMap })
+  return Go
+exec (Rcv r) = do -- if r is not 0, return last sound played
+  v <- duetVal (Reg r)
+  if v == 0
+  then return Go
+  else do
+    s <- get
+    return (Terminate (lastSound s))
+
 exec (Jump r v) = undefined -- if r is greater than 0, skip v commands
 
 --------- parsers -----------
