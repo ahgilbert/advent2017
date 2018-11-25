@@ -86,10 +86,15 @@ parseRegVal s = do
   v <- parseVal
   return (reg, v)
 
-parseSound = do
-  string "snd"
+parseMono :: String -> Parser Register
+parseMono s = do
+  string s
   space
   reg <- letterChar
+  return reg
+
+parseSound = do
+  reg <- parseMono "snd"
   return $ Sound reg
 
 parseSet = do
@@ -109,9 +114,7 @@ parseMod = do
   return $ Mod reg v
 
 parseRcv = do
-  string "rcv"
-  space
-  reg <- letterChar
+  reg <- parseMono "rcv"
   return $ Rcv reg
 
 parseJump = do
