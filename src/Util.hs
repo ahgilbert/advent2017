@@ -13,6 +13,11 @@ slurp n = do
   raw <- reverse <$> dropWhile (== '\n') <$> reverse <$> readFile filename
   return raw
 
+xslurp n = do
+  let filename = "input/x" ++ show n ++ ".txt"
+  raw <- reverse <$> dropWhile (== '\n') <$> reverse <$> readFile filename
+  return raw
+
 manhattan (a,b) (c,d) =
   let dx = max a c - min a c
       dy = max b d - min b d

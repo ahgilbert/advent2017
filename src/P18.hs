@@ -31,10 +31,10 @@ data Val = Const Int | Reg Register
   deriving Show
 
 p18 = do
-  input <- lines <$> slurp 18
+  input <- lines <$> xslurp 18
   let parsed = rights $ map (runParser parseDuet "") input
       numCmds = length parsed
-  arr <- newArray (0, numCmds) (Sound 'a') :: IO DuetArray
+  arr <- newArray (0, numCmds) (Sound 'a') :: IO DuetArray -- initialize registers to 0
   mapM_ (\(l,d) -> writeArray arr l d) $ zip [0..numCmds] parsed
   print $ numCmds
 
@@ -109,6 +109,8 @@ parseMod = do
   return $ Mod reg v
 
 parseRcv = do
+  string "rcv"
+  space
   reg <- letterChar
   return $ Rcv reg
 
