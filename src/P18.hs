@@ -19,18 +19,18 @@ data DuetMachine = DuetMachine {
 type DuetArray = IOArray Int Duet
 data Duet =
     Nil
-  | Sound Register
+  | Sound Val
   | Set Register Val
   | Add Register Val
   | Mul Register Val
   | Mod Register Val
-  | Rcv Register
+  | Rcv Val
   | Jump Val Val
   deriving (Show)
 type Register = Char
 data Val = Const Int | Reg Register
   deriving Show
-data Faith a = Go | Terminate a
+data Faith a = Go Int | Terminate a
 
 p18 = do
   input <- lines <$> xslurp 18
@@ -58,43 +58,48 @@ duetVal (Const i) =
 exec :: Duet -> DuetState (Faith Int)
 exec Nil = undefined -- something went wrong
 exec (Sound r) = do -- Set lastSound to val of r
-  v <- duetVal (Reg r)
+  v <- duetVal r
   s <- get
   put (s { lastSound = v })
-  return Go
+  return (Go 1)
 exec (Set r v) = do -- set r to v
   v <- duetVal v
   s <- get
   let newMap = M.insert r v (registers s)
   put (s { registers = newMap })
-  return Go
+  return (Go 1)
 exec (Add r v) = do -- set r to r + v
   v <- duetVal v
   s <- get
   let newMap = M.insertWith (+) r v (registers s)
   put (s { registers = newMap })
-  return Go
+  return (Go 1)
 exec (Mul r v) = do -- set r to r * v
   v <- duetVal v
   s <- get
   let newMap = M.insertWith (*) r v (registers s)
   put (s { registers = newMap })
-  return Go
+  return (Go 1)
 exec (Mod r v) = do -- set r to r % v
   v <- duetVal v
   s <- get
   let newMap = M.insertWith (*) r v (registers s)
   put (s { registers = newMap })
-  return Go
+  return (Go 1)
 exec (Rcv r) = do -- if r is not 0, return last sound played
-  v <- duetVal (Reg r)
+  v <- duetVal r
   if v == 0
-  then return Go
+  then return (Go 1)
   else do
     s <- get
     return (Terminate (lastSound s))
 
-exec (Jump r v) = undefined -- if r is greater than 0, skip v commands
+exec (Jump r v) = do -- if r is greater than 0, skip v commands
+  r' <- duetVal r
+  v' <- duetVal v
+  if r' <= 0
+  then return (Go 1)
+  else return (Go v')
 
 --------- parsers -----------
 
@@ -131,12 +136,12 @@ parseRegVal s = do
   v <- parseVal
   return (reg, v)
 
-parseMono :: String -> Parser Register
+parseMono :: String -> Parser Val
 parseMono s = do
   string s
   space
   reg <- letterChar
-  return reg
+  return (Reg reg)
 
 parseSound = do
   reg <- parseMono "snd"
