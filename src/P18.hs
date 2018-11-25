@@ -12,7 +12,7 @@ import Text.Megaparsec.Char
 type DuetState = StateT DuetMachine IO
 data DuetMachine = DuetMachine {
   pc :: Int,
-  lastSound :: Int,
+  lastSound :: Maybe Int,
   commands :: DuetArray,
   registers :: M.Map Char Int
   }
@@ -40,11 +40,23 @@ p18 = do
   arr <- newArray (0, numCmds) Nil :: IO DuetArray
   mapM_ (\(l,d) -> writeArray arr l d) $ zip [0..numCmds] parsed
 
-duetStep :: DuetState ()
+initVal arr regs = DuetMachine { pc = 0, lastSound = Nothing, commands = arr, registers = regs }
+
+duetLoop :: DuetState Int
+duetLoop = do
+  inc <- duetStep
+  case inc of
+    (Terminate n) -> return n
+    (Go n) -> do
+      s <- get
+      put (s { pc = (pc s) + n })
+      duetLoop
+
+duetStep :: DuetState (Faith Int)
 duetStep = do
-  machine <- get
-  cmd <- liftIO $ readArray (commands machine) (pc machine)
-  return ()
+  s <- get
+  cmd <- liftIO $ readArray (commands s) (pc s)
+  exec cmd
 
 duetVal :: Val -> DuetState Int
 duetVal (Reg r) = do
@@ -60,7 +72,7 @@ exec Nil = undefined -- something went wrong
 exec (Sound r) = do -- Set lastSound to val of r
   v <- duetVal r
   s <- get
-  put (s { lastSound = v })
+  put (s { lastSound = (Just v) })
   return (Go 1)
 exec (Set r v) = do -- set r to v
   v <- duetVal v
@@ -92,8 +104,7 @@ exec (Rcv r) = do -- if r is not 0, return last sound played
   then return (Go 1)
   else do
     s <- get
-    return (Terminate (lastSound s))
-
+    return (Terminate (fromJust $ lastSound s))
 exec (Jump r v) = do -- if r is greater than 0, skip v commands
   r' <- duetVal r
   v' <- duetVal v
