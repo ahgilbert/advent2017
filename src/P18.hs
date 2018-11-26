@@ -3,6 +3,7 @@ module P18 where
 import Util
 import Control.Monad.State.Lazy
 import Data.Array.IO
+import Data.List
 import Data.Either
 import qualified Data.Map.Strict as M
 import Data.Maybe
@@ -36,13 +37,14 @@ p18 = do
   input <- lines <$> xslurp 18
   let parsed = rights $ map (runParser parseDuet "") input
       numCmds = length parsed
+      registers = M.fromList $ map (\x -> (x,0)) $ nub $ mapMaybe getRegister parsed
   putStrLn $ (show numCmds) <> " out of " <> (show $ length input) <> " commands parsed" -- TODO execute machine
   arr <- newArray (0, numCmds) Nil :: IO DuetArray
   mapM_ (\(l,d) -> writeArray arr l d) $ zip [0..numCmds] parsed
+  (finalValue, finalState) <- runStateT duetLoop (initVal arr registers)
+  print finalValue
 
-initVal arr regs = DuetMachine { pc = 0, lastSound = Nothing, commands = arr, registers = regs }
-
-duetLoop :: DuetState Int
+duetLoop :: DuetState Int -- StateT DuetMachine IO Int
 duetLoop = do
   inc <- duetStep
   case inc of
@@ -111,6 +113,15 @@ exec (Jump r v) = do -- if r is greater than 0, skip v commands
   if r' <= 0
   then return (Go 1)
   else return (Go v')
+
+getRegister :: Duet -> Maybe Register
+getRegister (Set a _) = Just a
+getRegister (Add a _) = Just a
+getRegister (Mul a _) = Just a
+getRegister (Mod a _) = Just a
+getRegister _ = Nothing
+
+initVal arr regs = DuetMachine { pc = 0, lastSound = Nothing, commands = arr, registers = regs }
 
 --------- parsers -----------
 
