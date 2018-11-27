@@ -34,7 +34,7 @@ data Val = Const Int | Reg Register
 data Faith a = Go Int | Terminate a
 
 p18 = do
-  input <- lines <$> xslurp 18
+  input <- lines <$> slurp 18
   let parsed = rights $ map (runParser parseDuet "") input
       numCmds = length parsed
       registers = M.fromList $ map (\x -> (x,0)) $ nub $ mapMaybe getRegister parsed
@@ -57,8 +57,17 @@ duetLoop = do
 duetStep :: DuetState (Faith Int)
 duetStep = do
   s <- get
+  -- liftIO $ showState s
   cmd <- liftIO $ readArray (commands s) (pc s)
   exec cmd
+
+showState :: DuetMachine -> IO ()
+showState s =
+  let regs = registers s
+  in do
+    cmd <- readArray (commands s) (pc s)
+    mapM_ print regs
+    print cmd
 
 duetVal :: Val -> DuetState Int
 duetVal (Reg r) = do
@@ -97,7 +106,7 @@ exec (Mul r v) = do -- set r to r * v
 exec (Mod r v) = do -- set r to r % v
   v <- duetVal v
   s <- get
-  let newMap = M.insertWith (*) r v (registers s)
+  let newMap = M.insertWith (flip mod) r v (registers s)
   put (s { registers = newMap })
   return (Go 1)
 exec (Rcv r) = do -- if r is not 0, return last sound played
