@@ -10,17 +10,26 @@ import Data.Maybe
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
+type DuetState2 = StateT DuetMachine2 IO
+data DuetMachine2 = DuetMachine2 {
+  one :: DuetMachine,
+  qOne :: [Int],
+  two :: DuetMachine,
+  qTwo :: [Int]
+}
+
 type DuetState = StateT DuetMachine IO
 data DuetMachine = DuetMachine {
   pc :: Int,
   lastSound :: Maybe Int,
   commands :: DuetArray,
-  registers :: M.Map Char Int
+  registers :: M.Map Char Int,
+  sendQueue :: [Int]
   }
 type DuetArray = IOArray Int Duet
 data Duet =
     Nil
-  | Sound Val
+  | Snd Val
   | Set Register Val
   | Add Register Val
   | Mul Register Val
@@ -80,7 +89,7 @@ duetVal (Const i) =
 
 exec :: Duet -> DuetState (Faith Int)
 exec Nil = undefined -- something went wrong
-exec (Sound r) = do -- Set lastSound to val of r
+exec (Snd r) = do -- Set lastSound to val of r
   v <- duetVal r
   s <- get
   put (s { lastSound = (Just v) })
@@ -130,7 +139,12 @@ getRegister (Mul a _) = Just a
 getRegister (Mod a _) = Just a
 getRegister _ = Nothing
 
-initVal arr regs = DuetMachine { pc = 0, lastSound = Nothing, commands = arr, registers = regs }
+initVal arr regs = DuetMachine
+  { pc = 0,
+    lastSound = Nothing,
+    commands = arr,
+    registers = regs,
+    sendQueue = [] }
 
 --------- parsers -----------
 
@@ -176,7 +190,7 @@ parseMono s = do
 
 parseSound = do
   reg <- parseMono "snd"
-  return $ Sound reg
+  return $ Snd reg
 
 parseSet = do
   (reg, v) <- parseRegVal "set"
