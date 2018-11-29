@@ -13,15 +13,13 @@ import Text.Megaparsec.Char
 type DuetState2 = StateT DuetMachine2 IO
 data DuetMachine2 = DuetMachine2 {
   one :: DuetMachine,
-  qOne :: [Int],
-  two :: DuetMachine,
-  qTwo :: [Int]
+  two :: DuetMachine
 }
 
 type DuetState = StateT DuetMachine IO
 data DuetMachine = DuetMachine {
+  pid :: Int,
   pc :: Int,
-  lastSound :: Maybe Int,
   commands :: DuetArray,
   registers :: M.Map Char Int,
   sendQueue :: [Int]
@@ -92,7 +90,7 @@ exec Nil = undefined -- something went wrong
 exec (Snd r) = do -- Set lastSound to val of r
   v <- duetVal r
   s <- get
-  put (s { lastSound = (Just v) })
+  put (s { sendQueue = [v] })
   return (Go 1)
 exec (Set r v) = do -- set r to v
   v <- duetVal v
@@ -124,7 +122,7 @@ exec (Rcv r) = do -- if r is not 0, return last sound played
   then return (Go 1)
   else do
     s <- get
-    return (Terminate (fromJust $ lastSound s))
+    return (Terminate (head $ sendQueue s))
 exec (Jump r v) = do -- if r is greater than 0, skip v commands
   r' <- duetVal r
   v' <- duetVal v
@@ -140,8 +138,8 @@ getRegister (Mod a _) = Just a
 getRegister _ = Nothing
 
 initVal arr regs = DuetMachine
-  { pc = 0,
-    lastSound = Nothing,
+  { pid = 0,
+    pc = 0,
     commands = arr,
     registers = regs,
     sendQueue = [] }
